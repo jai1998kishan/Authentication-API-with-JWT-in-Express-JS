@@ -62,9 +62,17 @@ class UserController {
         if (user != null) {
           const isMatch = await bcrypt.compare(password, user.password);
           if (user.email === email && isMatch) {
+            //Generate JWT Token
+            const token = jwt.sign(
+              { userID: user._id },
+              process.env.JWT_SECRET_KEY,
+              { expiresIn: "5d" }
+            );
+
             res.send({
               status: "success",
               message: "Login Success",
+              token: token,
             });
           } else {
             res.send({
