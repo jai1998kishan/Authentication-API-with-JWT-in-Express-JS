@@ -3,6 +3,7 @@ import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 
 class UserController {
+  //registration
   static userRegistration = async (req, res) => {
     const { name, email, password, password_confirmation, tc } = req.body;
     const user = await UserModel.findOne({ email: email });
@@ -97,6 +98,35 @@ class UserController {
       res.send({
         status: "failed",
         message: "unable to Login",
+      });
+    }
+  };
+
+  //changing password
+  static changeUserPassword = async (req, res) => {
+    const { password, password_confirmation } = req.body;
+    if (password && password_confirmation) {
+      if (password !== password_confirmation) {
+        res.send({
+          status: "failed",
+          message: "New password and confirm password doesn't match..",
+        });
+      } else {
+        const newHashPassword = await bcrypt.hash(password, 10);
+        // console.log(req.user);
+        // console.log(req.user._id);
+        await UserModel.findByIdAndUpdate(req.user._id, {
+          $set: { password: newHashPassword },
+        });
+        res.send({
+          status: "success",
+          message: "Password change successfully",
+        });
+      }
+    } else {
+      res.send({
+        status: "failed",
+        message: "All fields are required",
       });
     }
   };
